@@ -3,7 +3,14 @@
 # inspired from create_simbox.sh
 
 SCRIPT_DIR=$(readlink -f ${0%/*})
-REPO_ROOT_FS=${SCRIPT_DIR}/repomir
+REPO_ROOT_FS=${SCRIPT_DIR}/repomir_fs
+REPO_CODENAME=precise
+REPO_URL=http://ch.archive.ubuntu.com/ubuntu/
+# using a local mirror repository
+#REPO_URL=file:///media/mariole/repo/
+
+FAKE=fakeroot
+FAKECH=fakechroot
 
 set -e
 trap "on_exit" EXIT
@@ -24,14 +31,15 @@ die()
   exit 1
 }
 
-repomir_configure()
+repomir_configure_script()
 {
   ${SCRIPT_DIR}/configure.sh
 }
 
 repomir_debootstrap()
 {
-  debootstrap precise ${REPO_ROOT_FS} http://de.archive.ubuntu.com/ubuntu/
+  echo "debootstrap..."
+  debootstrap ${REPO_CODENAME} ${REPO_ROOT_FS} ${REPO_URL}
   chroot ${REPO_ROOT_FS} locale-gen en_US.UTF-8
   . ${REPO_ROOT_FS}/etc/lsb-release
   echo -n repomir_rootfs > ${REPO_ROOT_FS}/etc/debian_chroot
@@ -41,21 +49,22 @@ repomir_debootstrap()
 # only get the minimal source.list to start up with
 # once git is setup, use etckeeper to get all the required configuration
 #
-repomir_apt()
+repomir_configure_sources_list()
 {
+  echo "confiure sources.list..."
   cat > ${REPO_ROOT_FS}/etc/apt/source.list << EOF
 #############################################################
 ################### OFFICIAL UBUNTU REPOS ###################
 #############################################################
 
 ###### Ubuntu Main Repos
-deb http://ch.archive.ubuntu.com/ubuntu/ precise main restricted universe multiverse
+deb ${REPO_URL} precise main restricted universe multiverse
 
 ###### Ubuntu Update Repos
-deb http://ch.archive.ubuntu.com/ubuntu/ precise-security main restricted universe multiverse
-deb http://ch.archive.ubuntu.com/ubuntu/ precise-updates main restricted universe multiverse
-deb http://ch.archive.ubuntu.com/ubuntu/ precise-proposed main restricted universe multiverse
-deb http://ch.archive.ubuntu.com/ubuntu/ precise-backports main restricted universe multiverse
+deb ${REPO_URL} precise-security main restricted universe multiverse
+deb ${REPO_URL} precise-updates main restricted universe multiverse
+deb ${REPO_URL} precise-proposed main restricted universe multiverse
+deb ${REPO_URL} precise-backports main restricted universe multiverse
 EOF
 }
 
@@ -95,16 +104,17 @@ on_exit()
   grep -q ${REPO_ROOT_FS}/proc          /proc/mounts && umount -l ${REPO_ROOT_FS}/proc
   grep -q ${REPO_ROOT_FS}/sys           /proc/mounts && umount -l ${REPO_ROOT_FS}/sys
   grep -q ${REPO_ROOT_FS}/run/shm       /proc/mounts && umount -l ${REPO_ROOT_FS}/run/shm
+  chroot ${REPO_ROOT_FS} umount -a
 }
 
 
 # entry point
-repomir_configure || die
-#repomir_debootstrap || die
+repomir_configure_script || die
+repomir_debootstrap || die
 repomir_mount_bind || die
-repomir_apt || die
+repomir_configure_sources_list || die
 repomir_localtime || die
 repomir_upgrade || die
 repomir_install_packages || die
-
+on_exit
 exit 0
