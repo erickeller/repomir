@@ -5,7 +5,7 @@
 
 return_value=0
 # add additional programm here
-LISTING="debootstrap wget gpg pbzip2"
+LISTING="debootstrap wget gpg pbzip2 fakeroot fakechroot"
 MISSING_LIST=""
 
 # take a listing and check if the porgramm exists
