@@ -58,7 +58,7 @@ repomir_debootstrap()
 repomir_configure_sources_list()
 {
   echo "confiure sources.list..."
-  cat > ${REPO_ROOT_FS}/etc/apt/source.list << EOF
+  cat > ${REPO_ROOT_FS}/etc/apt/sources.list << EOF
 #############################################################
 ################### OFFICIAL UBUNTU REPOS ###################
 #############################################################
@@ -69,7 +69,6 @@ deb ${REPO_URL} precise main restricted universe multiverse
 ###### Ubuntu Update Repos
 deb ${REPO_URL} precise-security main restricted universe multiverse
 deb ${REPO_URL} precise-updates main restricted universe multiverse
-deb ${REPO_URL} precise-proposed main restricted universe multiverse
 deb ${REPO_URL} precise-backports main restricted universe multiverse
 EOF
 }
