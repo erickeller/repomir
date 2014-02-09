@@ -216,7 +216,13 @@ repomir_debootstrap || die
 repomir_mount_bind || die
 repomir_configure_sources_list || die
 repomir_localtime || die
+pre_install_configure || die
 repomir_upgrade || die
 repomir_install_packages || die
-on_exit
+post_install_configure || die
+add_radmin_user || die
+add_repo_user || die
+clone_debmir || die
+update_cron || die
+
 exit 0
