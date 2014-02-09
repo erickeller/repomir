@@ -162,6 +162,18 @@ chmod -R 774 /usr/local/repo
 EOF
 return $?
 }
+
+# clone as repo user, debmir from git repository, and setup links to /usr/bin
+clone_debmir()
+{
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+su - repo
+git clone ${DEBMIR_URL} /usr/local/repo/debmir
+EOF
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+for script in \$(ls /usr/local/repo/debmir/*.sh); do ln -sf \$script /usr/bin/\$(basename \$script);done
+EOF
+}
 on_exit()
 {
   echo "exiting, umount, cleanup..."
