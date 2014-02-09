@@ -116,6 +116,32 @@ repomir_install_packages()
   chroot ${REPO_ROOT_FS} apt-get autoclean
 }
 
+# after package installation, need some configurations
+post_install_configure()
+{
+  # setup git for etckeeper remove shadow files
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+sed -i 's/VCS="bzr"/#VCS="bzr"/g;s/#VCS="git"/VCS="git"/g' /etc/etckeeper/etckeeper.conf
+etckeeper init
+pushd /etc
+git rm --cached shadow* group* passwd*
+echo "
+# discard shadow passwd group
+passwd*
+group*
+shadow*
+" >> /etc/.gitignore
+echo "
+[user]
+  name = repomir scatch
+  email = root@repomir
+" >> /etc/.git/config
+git remote add origin ${ETCKEEPER_URL}
+popd
+etckeeper commit -m "initial commit"
+EOF
+}
+
 on_exit()
 {
   echo "exiting, umount, cleanup..."
