@@ -7,7 +7,13 @@ REPO_ROOT_FS=${SCRIPT_DIR}/repomir_fs
 REPO_CODENAME=precise
 REPO_URL=http://ch.archive.ubuntu.com/ubuntu/
 # using a local mirror repository
-#REPO_URL=file:///media/mariole/repo/
+REPO_URL=file:///media/mariole/repo/
+LOCAL_REPO_MOUNT=`sed -e "s#file://##g" <<< "file:///media/mariole/repo/"`
+
+# debmir git projet url
+DEBMIR_URL=https://github.com/erickeller/debmir.git
+# etckeeper git project url
+ETCKEEPER_URL=https://github.com/erickeller/etckeeper-repomir.git
 
 FAKE=fakeroot
 FAKECH=fakechroot
