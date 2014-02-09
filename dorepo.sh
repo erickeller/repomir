@@ -87,6 +87,13 @@ repomir_mount_bind()
   mount --bind /dev/pts ${REPO_ROOT_FS}/dev/pts
   mount --bind /proc ${REPO_ROOT_FS}/proc
   mount --bind /sys ${REPO_ROOT_FS}/sys
+  # only create local
+  if [[ "${REPO_URL}" =~ "file:" ]]
+  then
+    echo "binding local repo: ${LOCAL_REPO_MOUNT} to the chroot fs"
+    chroot ${REPO_ROOT_FS} mkdir -p ${LOCAL_REPO_MOUNT}
+    mount --bind ${LOCAL_REPO_MOUNT} ${REPO_ROOT_FS}${LOCAL_REPO_MOUNT}
+  fi
 }
 
 repomir_localtime()
@@ -112,11 +119,17 @@ repomir_install_packages()
 
 on_exit()
 {
+  echo "exiting, umount, cleanup..."
   grep -q ${REPO_ROOT_FS}/dev/pts       /proc/mounts && umount -l ${REPO_ROOT_FS}/dev/pts
   grep -q ${REPO_ROOT_FS}/dev           /proc/mounts && umount -l ${REPO_ROOT_FS}/dev
   grep -q ${REPO_ROOT_FS}/proc          /proc/mounts && umount -l ${REPO_ROOT_FS}/proc
   grep -q ${REPO_ROOT_FS}/sys           /proc/mounts && umount -l ${REPO_ROOT_FS}/sys
   grep -q ${REPO_ROOT_FS}/run/shm       /proc/mounts && umount -l ${REPO_ROOT_FS}/run/shm
+
+  if [[ "${REPO_URL}" =~ "file:" ]]
+  then
+    umount -l ${REPO_ROOT_FS}/media/mariole/repo
+  fi
   chroot ${REPO_ROOT_FS} umount -a
 }
 
