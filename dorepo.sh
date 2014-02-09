@@ -174,6 +174,25 @@ EOF
 for script in \$(ls /usr/local/repo/debmir/*.sh); do ln -sf \$script /usr/bin/\$(basename \$script);done
 EOF
 }
+
+# setup cronjobs for repo user
+# automatically update repository and initiate rsync backup
+update_cron()
+{
+  echo "updating crontab for repo user"
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+echo '
+# m h  dom mon dow   command
+8 */12 * * * /usr/local/bin/update-repo.sh /repo | tee /var/log/repo/update-repo.log 2>&1
+8 3,15 * * * /usr/local/bin/backup-repo.sh "/repo/*" /repo_backup | tee /var/log/repo/backup-repo.log 2>&1
+' > /var/spool/cron/crontabs/repo
+EOF
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+chown repo:crontab /var/spool/cron/crontabs/repo
+chmod 600 /var/spool/cron/crontabs/repo
+EOF
+}
+
 on_exit()
 {
   echo "exiting, umount, cleanup..."
