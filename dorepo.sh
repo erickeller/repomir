@@ -73,6 +73,14 @@ deb ${REPO_URL} precise-backports main restricted universe multiverse
 EOF
 }
 
+pre_install_configure()
+{
+  cat > ${REPO_ROOT_FS}/usr/local/bin/invoke-rc.d <<EOF
+echo PREVENTING /usr/local/bin/invoke-rc.d \$@
+EOF
+  chmod +x ${REPO_ROOT_FS}/usr/local/bin/invoke-rc.d
+}
+
 repomir_mount_bind()
 {
   mount --bind /dev ${REPO_ROOT_FS}/dev
