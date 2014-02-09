@@ -110,11 +110,10 @@ repomir_upgrade()
 repomir_install_packages()
 {
   export DEBIAN_FRONTEND=noninteractive
-  chroot ${REPO_ROOT_FS} apt-get -y install ssh vim apache2 vsftpd acpid usbutils pciutils \
-    syslinux ethtool tmux gawk zsh git-core
-  # missing htop shorwall grub2
+  chroot ${REPO_ROOT_FS} apt-get -y install ssh vim apache2 vsftpd acpid usbutils xfsprogs pciutils \
+    info man htop shorewall grub2 syslinux ethtool tmux gawk zsh git-core git-svn etckeeper ack-grep debmirror
   chroot ${REPO_ROOT_FS} apt-get -y purge vim-tiny
-  chroot ${REPO_ROOT_FS} apt-get clean
+  chroot ${REPO_ROOT_FS} apt-get autoclean
 }
 
 on_exit()
