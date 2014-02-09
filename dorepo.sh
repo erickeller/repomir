@@ -142,6 +142,26 @@ etckeeper commit -m "initial commit"
 EOF
 }
 
+add_radmin_user()
+{
+  chroot ${REPO_ROOT_FS} /bin/bash -x <<EOF
+adduser --disabled-password --gecos "" radmin
+echo "radmin:radmin" | chpasswd
+adduser radmin sudo
+EOF
+return $?
+}
+
+add_repo_user()
+{
+  chroot ${REPO_ROOT_FS} /bin/bash -x <<EOF
+adduser --disabled-login repo --no-create-home --force --gecos "repo user"
+mkdir -p /usr/local/repo
+chown -R repo:repo /usr/local/repo
+chmod -R 774 /usr/local/repo
+EOF
+return $?
+}
 on_exit()
 {
   echo "exiting, umount, cleanup..."
