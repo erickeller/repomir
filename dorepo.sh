@@ -193,6 +193,34 @@ chmod 600 /var/spool/cron/crontabs/repo
 EOF
 }
 
+setup_apache2()
+{
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+rm -f /etc/apache2/site-enabled/000-default
+sed -i 's/ServerTokens OS/#ServerTokens OS\nServerTokens Prod\nServerSignature Off/g' /etc/apache2/conf.d/security
+echo '
+#
+#  repository (/etc/apache2/sites-available/repository)
+#
+<VirtualHost *:80>
+  ServerAdmin buildr@localhost
+  DocumentRoot /repo
+<Directory /repo>
+  Options +Indexes +SymlinksIfOwnerMatch
+  IndexOptions NameWidth=* +SuppressDescription
+  AllowOverride None
+  Order allow,deny
+  allow from all
+</Directory>
+# Logfiles
+ErrorLog  ${APACHE_LOG_DIR}/repositoryi_error.log
+CustomLog ${APACHE_LOG_DIR}/repository.log combined
+</VirtualHost>
+'> /etc/apache2/sites-available/repository
+a2ensite repository
+EOF
+}
+
 on_exit()
 {
   echo "exiting, umount, cleanup..."
