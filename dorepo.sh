@@ -140,6 +140,9 @@ git remote add origin ${ETCKEEPER_URL}
 popd
 etckeeper commit -m "initial commit"
 EOF
+  chroot ${REPO_ROOT_FS} /bin/bash -x << EOF
+mkdir -p /repo /repo_backup
+EOF
 }
 
 add_radmin_user()
